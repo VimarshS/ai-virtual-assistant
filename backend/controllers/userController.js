@@ -1,5 +1,7 @@
 import uploadOnCloudinary from "../config/cloudinary.js"
+import geminiResponse from "../gemini.js"
 import User from "../models/user_model.js"
+import moment from "moment"
 
 export const getCurrentUser=async(req,res)=>{
     try {
@@ -30,7 +32,73 @@ export const updateAssistant=async (req,res)=>{
         },{new:true}).select("-password")
         return res.status(200).json(user)
     } catch (error) {
-    console.log("UPDATE ERROR:", error);  // 👈 IMPORTANT
+    console.log("UPDATE ERROR:", error);  
     return res.status(500).json({ message: error.message });
 }
+}
+
+export const askToAssistant =async(req,res)=>{
+    try {
+        const user=await User.findById(req.userId);
+        const userName=user.name
+        const assistantName=user.assistantName
+        const result=await geminiResponse(command,userName,assistantName)
+
+        const jsonMatch=result.match(/{[\s\S]*}/);
+        if(!jsonMatch){
+            return res.status(400).json({response:"Sorry, I couldn't understand the response from the assistant."})
+
+            const genResult=JSON.parse(jsonMatch[0])
+            const type=genResult.type
+
+            switch(type){
+                case 'get-date' :
+                    return res.json({
+                        type,
+                        userInput:gemResult.userInput,
+                        response:`current date is ${moment().format("YYYY-MM-DD")}`
+
+                    });
+                case 'get-time' :
+                    return res.json({
+                        type,
+                        userInput:gemResult.userInput,
+                        response:`current time is ${moment().format("HH:mm:A")}`
+
+                    });
+                case 'get-day' :
+                    return res.json({
+                        type,
+                        userInput:gemResult.userInput,
+                        response:`today is ${moment().format("dddd")}`
+
+                    });
+                case 'get-month' :
+                    return res.json({
+                        type,
+                        userInput:gemResult.userInput,
+                        response:`current date is ${moment().format("MMMM")}`
+
+                    })  
+                    case "google_search":
+                    case "youtube_search":
+                    case "youtube_play":
+                    case "general":  
+                    case "calculator_open":
+                    case "instagram_open":
+                    case "facebook_open":
+                    case "weather-show":
+                        return res.json({
+                            type,
+                            userInput:gemResult.userInput,
+                            response:gemResult.response,
+                        });
+                    default:
+                        return res.status(400).json({response:"Sorry, I couldn't understand the command."})
+            }
+        }
+    } catch (error) {
+        return res.status(500).json({response:"ask assistant error."})
+        
+    }
 }

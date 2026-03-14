@@ -6,6 +6,7 @@ import authRouter from './routes/auth_routes.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import userRouter from './routes/user_routes.js';
+import geminiResponse from './gemini.js';
  
 
 
@@ -21,8 +22,8 @@ app.use(cookieParser());
 app.use('/api/auth',authRouter);
 app.use('/api/user',userRouter);
 
-connectDB();
  
 app.listen(port, () => {
+    connectDB();
     console.log(`Server is running on port ${port}`);
 });  

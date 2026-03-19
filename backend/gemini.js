@@ -10,7 +10,7 @@ const geminiResponse =async(command,assistantName,userName)=>{
         Your task is to understand the user's natural language input and respond with a JSON object like this:
         {
         "type":"general" |"google_search" | "youtube_search" | "youtube_play" | "get_time" | "get_date" | "get_day" | "get_month" | "calculator_open" |"instagram_open" |"facebook_open" | "weather-show" ,
-        "userinput": "<original user input>" {only remove your name from userinput if exists} and agar kisi ko google ya youtube pe kuch search karne ko bola hai to userinput me only vo search vala text jaye,
+        "userInput": "<original user input>" {only remove your name from userInput if exists} and agar kisi ko google ya youtube pe kuch search karne ko bola hai to userInput me only vo search vala text jaye,
         "response": "< a short spoken response to read out loud to the user>"
         }
         Instructions:
@@ -32,7 +32,7 @@ const geminiResponse =async(command,assistantName,userName)=>{
         - "get_month": if user asks for the current month.
 
         Important:
-        - Use "{author name}" agar koi puche tumne kisne banaya
+        - Use ${userName} agar koi puche tumne kisne banaya
         - Only respond with the JSON object, nothing else.
 
         now your userInput- ${command}

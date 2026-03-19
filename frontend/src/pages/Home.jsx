@@ -3,9 +3,10 @@ import { useContext } from 'react'
 import { userDataContext } from '../context/userContext'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { useEffect } from 'react'
 
 const Home = () => {
-  const {userData,serverUrl,setUserData}=useContext(userDataContext)
+  const {userData,serverUrl,setUserData,getGeminiResponse}=useContext(userDataContext)
   const navigate= useNavigate()
 
   const handleLogout=async()=>{
@@ -18,8 +19,28 @@ const Home = () => {
       setUserData(null)
       console.log(error);
     }
-
   }
+  useEffect(()=>{
+      const SpeechRecognition=window.SpeechRecognition || window.webkitSpeechRecognition//webspeech api is builtin api in javascript and it has two versions one is SpeechRecognition and other is webkitSpeechRecognition and we are checking if any of them is available in the browser and using it for voice recognition
+
+      const recognition=new SpeechRecognition();
+      recognition.continuous=true,
+      recognition.lang="en-US"
+
+      recognition.onresult=async (e)=>{
+        
+        const transcript=e.results[e.results.length-1][0].transcript.trim();
+        console.log("heard :" + transcript)
+      if(transcript.toLowerCase().includes(userData.assistantName.toLowerCase())){
+         const data=await getGeminiResponse(transcript)
+         console.log("Gemini response:", data);
+      }
+    }
+
+      recognition.start()
+  },[])
+  
+      
   return (
     <div className='w-full min-h-screen bg-gradient-to-t from-[black] to-[#02023d] flex justify-center items-center flex-col gap-[15px]'>
       <button className='min-w-37.5 h-13.75 mt-5 text-black font-semibold bg-white absolute top-[20px] right-[20px] rounded-full cursor-pointer text-[18px]' onClick={handleLogout}>Log Out</button>
